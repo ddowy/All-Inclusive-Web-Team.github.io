@@ -4,7 +4,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useUserData } from '../../../../UserData'
 import { faImage, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useRef, useState } from 'react'
-import {FilePond} from 'react-filepond'
+import {FilePond, registerPlugin } from 'react-filepond'
+import FilePondPluginFileEncode from 'filepond-plugin-file-encode';
+import FilePondPluginImageResize from 'filepond-plugin-image-resize';
+import FilePondPluginImageTransform from 'filepond-plugin-image-transform';
+
+// Register the plugin
+
+registerPlugin(FilePondPluginFileEncode, FilePondPluginImageResize, FilePondPluginImageTransform);
 
 const MakeAPost = ({makeAPostVisible, setMakeAPostVisible}) => {
     const user = useUserData()
@@ -13,10 +20,13 @@ const MakeAPost = ({makeAPostVisible, setMakeAPostVisible}) => {
 
     const [imageInputOpen, setImageInputOpen] = useState(false)
     const [files, setFiles] = useState([])
+
+    let pond = null
     // const [currentPost, setCurrentPost] = useState(null)
 
     const handleXBtnClick = () => {
         setMakeAPostVisible(true)
+        setImageInputOpen(false)
     }
 
     const onImageIconClick = () => {
@@ -26,6 +36,7 @@ const MakeAPost = ({makeAPostVisible, setMakeAPostVisible}) => {
     const cancelImageUpload = () => {
         setImageInputOpen(false)
     }
+
 
     return (
         <div className="make-a-post" hidden={makeAPostVisible}>
@@ -52,9 +63,15 @@ const MakeAPost = ({makeAPostVisible, setMakeAPostVisible}) => {
                                             files={files}
                                             onupdatefiles={setFiles}
                                             allowMultiple={false}
-                                            server="http://localhost:3001/post/async-file-upload"
+                                            // server="http://localhost:3001/post"
                                             name="imgName"
                                             labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+                                            withCredentials={true}
+                                            allowFileEncode={true}
+                                            allowImageTransform={true}
+                                            allowImageResize={true}
+                                            imageResizeTargetWidth={300}
+                                            imageResizeTargetHeight={300}
                                         />
                                     </div>
                                 }

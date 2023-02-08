@@ -1,19 +1,8 @@
 import express from 'express'
 import {getPosts, postPost, deletePost, getUserPosts, likePost, dislikePost, getPostReactionsAmount, getPostByID} from '../db.js'
 import path from 'path'
-import multer from 'multer'
 import fs from 'fs'
 
-
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, './public/uploaded-images')
-    }, 
-    filename: function(req,file,cb) {
-        cb(null, Date.now() + path.extname(file.originalname))
-    }
-})
-const upload = multer({storage})
 const router = express.Router()
 
 router.route('/').get(async (req,res)=> {
@@ -27,17 +16,17 @@ router.route('/').get(async (req,res)=> {
 }).post(async(req,res) => {
     // const filename = req.file ? req.file.filename : null
     const file = JSON.parse(req.body.imgName)
-    console.log(file)
-    const dataToBuffer = new Buffer.from(file.data, 'base64')
-    fs.writeFileSync(`public/uploaded-images/${file.name}`, dataToBuffer)
-    // const post = {
-    //     author: req.user.name,
-    //     content: req.body.post,
-    //     userID: req.user.id,
-    //     filename,
-    // }
+    const base64String = new Buffer.from(file.data, 'base64')
+    const filename = `${Date.now()}${file.name}`
+    fs.writeFileSync(`public/uploaded-images/${filename}`, base64String)
+    const post = {
+        author: req.user.name,
+        content: req.body.post,
+        userID: req.user.id,
+        filename,
+    }
     try {
-        // await postPost(post)
+        await postPost(post)
         res.redirect('back')
         return true
     } catch (error) {
@@ -46,14 +35,6 @@ router.route('/').get(async (req,res)=> {
     }
 })
 
-// router.route('/').post(upload.single('imgName'), async (req, res) => {
-//     const filename = req.file ? req.file.filename : null
-//     try {
-//         console.log(filename)
-//     } catch (error) {
-//         console.log(error)
-//     }
-// })
 
 router.route('/:id').get(async (req,res) => {
     const ID = req.params.id
